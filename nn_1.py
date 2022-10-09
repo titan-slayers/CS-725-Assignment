@@ -127,7 +127,7 @@ class Net(object):
 		del_b = []
 
 		y = np.reshape(y, (batch_size, 1))
-		delY = 2./batch_size * (pred - y) 
+		delY = 1./batch_size * (pred - y) 
 
 		#Computing gradients in reverse order (from output to input)
 		for (w, a) in reversed(list(zip(self.weights, a_states))):
@@ -260,7 +260,7 @@ def loss_regularization(weights, biases):
 	'''
 	sum=0
 	for w in weights:
-		sum += np.sum(np.power(w, 2))
+		sum += np.sum(np.power(weights, 2))
 	return sum
 
 def loss_fn(y, y_hat, weights, biases, lamda):
@@ -408,7 +408,7 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 100
+	max_epochs = 50
 	batch_size = 256
 	learning_rate = 0.001
 	num_layers = 1
