@@ -1,12 +1,18 @@
+from cgi import test
 import sys
 import os
 import numpy as np
 import pandas as pd
+import math
+from sklearn.datasets import make_regression
+from matplotlib import pyplot
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
 # The seed will be fixed to 42 for this assigmnet.
 np.random.seed(42)
 
-NUM_FEATS = 90
+NUM_FEATS = 5
 
 class Net(object):
 	'''
@@ -53,9 +59,11 @@ class Net(object):
 		# Output layer
 		self.biases.append(np.random.uniform(-1, 1, size=(1, 1)))
 		self.weights.append(np.random.uniform(-1, 1, size=(self.num_units, 1)))
+		#print(self.biases)
 
-	def relu(self,M):
-		return np.maximum(0,M)
+
+	def activation(self,h):
+		return np.maximum(0,h)
 
 	def __call__(self, X):
 		'''
@@ -71,35 +79,33 @@ class Net(object):
 		Returns
 		----------
 			y : Output of the network, numpy array of shape m x 1
-
 		'''
 		a = X
 		for i, (w, b) in enumerate(zip(self.weights, self.biases)):
-			h = np.dot(a, w) + b.T
 			
+			h = np.dot(a, w) + b.T
 			if i < len(self.weights)-1:
-				a = self.relu(h)
+				a = self.activation(h)		
 			else: # No activation for the output layer
-				a = h
-
+				a=h
 		return a
+				
 
-	def forward(self, X):
+	def forward(self,X)	:
 		a = X
-		a_states = []
+		activations = []
+		activations.append(X)
 		for i, (w, b) in enumerate(zip(self.weights, self.biases)):
-			a_states.append(a)
 			h = np.dot(a, w) + b.T
 
 			if i < len(self.weights)-1:
-				a = self.relu(h)
+				a = self.activation(h)
+				activations.append(a)
+				
 			else: # No activation for the output layer
 				a = h
+		return [activations, a]
 
-		pred = a
-		return [a_states, pred]
-
-		
 
 	def backward(self, X, y, lamda):
 		'''
@@ -119,34 +125,29 @@ class Net(object):
 
 		Hint: You need to do a forward pass before performing backward pass.
 		'''
-		fwd = self.forward(X) #forward pass
-		a_states,pred = fwd[0],fwd[1]
+		answer,pred = self.forward(X) #forward pass
+		
 		batch_size = y.shape[0]
-
+		y = np.reshape(y,(len(y),1))
+		delY = 2./batch_size*(pred-y)
 		del_W = []
-		del_b = []
-
-		y = np.reshape(y, (batch_size, 1))
-		delY = 1./batch_size * (pred - y) 
-
-		#Computing gradients in reverse order (from output to input)
-		for (w, a) in reversed(list(zip(self.weights, a_states))):
-			delW = np.dot(a.T, delY) + (lamda*w)
-			delB = np.sum(delY, axis=0)
-			delB = np.reshape(delB, (len(delB), 1))
-			delX = np.dot(delY, w.T)
+		del_B = []
+		
+		for (w,a) in reversed(list(zip(self.weights,answer))):
+			delW = np.dot(a.T,delY)+ (lamda*w)
+			delB = np.sum(delY,axis=0)
+			delB = np.reshape(delB,(len(delB),1))
+			delX = np.dot(delY,w.T)
 			delY = delX
-
+		
 			del_W.append(delW)
-			del_b.append(delB)
-
-		del_W.reverse()
-		del_b.reverse()
-
-		return [del_W,del_b]
-			
+			del_B.append(delB)
 
 		
+		del_W.reverse()
+		del_B.reverse()
+		return del_W,del_B
+
 
 
 class Optimizer(object):
@@ -167,7 +168,7 @@ class Optimizer(object):
 	eps : 1e-8
 	'''
 
-	def __init__(self, learning_rate, beta=0.9 , gamma=0.999 , epsilon=1e-8):
+	def __init__(self, learning_rate, B=0.9, Y=0.999, epsilon=1e-8):
 		'''
 		Create a Gradient Descent based optimizer with given
 		learning rate.
@@ -178,14 +179,19 @@ class Optimizer(object):
 		Hint: You can use the class members to track various states of the
 		optimizer.
 		'''
-		self.learning_rate = learning_rate
-		self.beta = beta
-		self.gamma = gamma
-		self.epsilon = epsilon
-		self.v_w, self.v_b, self.s_w, self.s_b = [],[],[],[]
-		self.t = 0
+		
+		self.B=B
+		self.Y=Y		
+		self.epsilon=epsilon
+		self.learning_rate=learning_rate	
+		self.v_dw=[]
+		self.s_dw=[]
+		self.v_db=[]
+		self.s_db=[]
+		self.t=0
 
-	def step(self,weights, biases, delta_weights, delta_biases):
+
+	def step(self, weights, biases, delta_weights, delta_biases):
 		'''
 		Parameters
 		----------
@@ -193,42 +199,39 @@ class Optimizer(object):
 			biases: Current biases of the network.
 			delta_weights: Gradients of weights with respect to loss.
 			delta_biases: Gradients of biases with respect to loss.
+
 		'''
-		if self.t==0:
-			for (dw,db) in zip(delta_weights, delta_biases):
-				self.v_w.append(np.full_like(dw, 0))
-				self.v_b.append(np.full_like(db, 0))
-				self.s_w.append(np.full_like(dw, 0))
-				self.s_b.append(np.full_like(db, 0))
+		
+		
+		if(self.t == 0):
+			for (dw,db) in zip(delta_weights,delta_biases):
+				self.v_dw.append(np.full_like(dw,0))
+				self.v_db.append(np.full_like(db,0))
+				self.s_dw.append(np.full_like(dw,0))
+				self.s_db.append(np.full_like(db,0))
+
+		self.t+=1		
+		
+		for j, (delta_weight,delta_bias) in enumerate(zip(delta_weights,delta_biases)):
+			self.v_dw[j] = self.B*self.v_dw[j] + (1-self.B)*(delta_weight)
+			self.v_db[j] = self.B*self.v_db[j] + (1-self.B)*(delta_bias)	
+			self.s_dw[j] = self.Y*self.s_dw[j] + (1-self.Y)*(delta_weight**2)
+			self.s_db[j] = self.Y*self.s_db[j] + (1-self.Y)*(delta_bias**2)
+			
+		    #bias correction
+			v_dw_correct = self.v_dw[j]/(1-self.B**self.t)
+			v_db_correct = self.v_db[j]/(1-self.B**self.t)
+			s_dw_correct = self.s_dw[j]/(1-self.Y**self.t)
+			s_db_correct = self.s_db[j]/(1-self.Y**self.t)
+
+			##update weights and biases
+			weights[j] = weights[j]-self.learning_rate*(v_dw_correct/(np.sqrt(s_dw_correct+self.epsilon)))
+			biases[j] = biases[j]-self.learning_rate*(v_db_correct/(np.sqrt(s_db_correct+self.epsilon)))
+		    
+		return weights,biases
+
 
 		
-		self.t += 1
-
-
-		for j, (dw,db) in enumerate(zip(delta_weights, delta_biases)):
-			#Calculating v for weights and biases
-			self.v_w[j] = self.beta * self.v_w[j] + (1-self.beta)*dw
-			self.v_b[j] = self.beta * self.v_b[j] + (1-self.beta)*db
-
-			#Calculating s for weights and biases
-			self.s_w[j] = self.gamma * self.s_w[j] + (1-self.gamma)*(dw**2)
-			self.s_b[j] = self.gamma * self.s_b[j] + (1-self.gamma)*(db**2)
-
-			#Correcting biases
-			v_w_new = self.v_w[j]/(1-self.beta**self.t)
-			v_b_new = self.v_b[j]/(1-self.beta**self.t)
-
-			s_w_new = self.s_w[j]/(1-self.gamma**self.t)
-			s_b_new = self.s_b[j]/(1-self.gamma**self.t)
-
-			#Update rule
-			denom1 = np.sqrt(s_w_new+self.epsilon)
-			weights[j] = weights[j] - self.learning_rate*(v_w_new / denom1)
-
-			denom2 = np.sqrt(s_b_new+self.epsilon)
-			biases[j] = biases[j] - self.learning_rate*(v_b_new/ denom2)
-
-		return weights, biases
 
 
 def loss_mse(y, y_hat):
@@ -243,8 +246,11 @@ def loss_mse(y, y_hat):
 	Returns
 	----------
 		MSE loss between y and y_hat.
+
 	'''
-	return np.mean(np.power(y-y_hat, 2))
+	return np.mean((y-y_hat)**2)
+
+	
 
 def loss_regularization(weights, biases):
 	'''
@@ -258,13 +264,13 @@ def loss_regularization(weights, biases):
 	----------
 		l2 regularization loss 
 	'''
-	sum=0
-	for w in weights:
-		sum += np.sum(np.power(weights, 2))
-	return sum
-
+	loss_reg=0
+	for entry in weights:
+		loss_reg=loss_reg+np.sum(np.power(entry,2))
+	return loss_reg
+	
 def loss_fn(y, y_hat, weights, biases, lamda):
-	'''
+	'''s
 	Compute loss =  loss_mse(..) + lamda * loss_regularization(..)
 
 	Parameters
@@ -278,8 +284,11 @@ def loss_fn(y, y_hat, weights, biases, lamda):
 	----------
 		l2 regularization loss 
 	'''
-	loss = loss_mse(y, y_hat) + lamda * loss_regularization(weights,biases)
-	return loss
+	loss=loss_mse(y,y_hat)
+	reg=loss_regularization(weights,biases)
+	loss_f=loss+ lamda*reg
+	return loss_f
+	
 
 def rmse(y, y_hat):
 	'''
@@ -294,7 +303,7 @@ def rmse(y, y_hat):
 	----------
 		RMSE between y and y_hat.
 	'''
-	return np.sqrt(np.mean(np.power((y-y_hat),2)))
+	return np.sqrt(np.mean((y-y_hat)**2))
 
 
 def cross_entropy_loss(y, y_hat):
@@ -364,7 +373,6 @@ def train(
 	# After running `max_epochs` (for Part 1) epochs OR early stopping (for Part 2), compute the RMSE on dev data.
 	dev_pred = net(dev_input)
 	dev_rmse = rmse(dev_target, dev_pred)
-
 	print('RMSE on dev data: {:.5f}'.format(dev_rmse))
 
 
@@ -385,45 +393,48 @@ def get_test_data_predictions(net, inputs):
 								on test data, numpy array of shape m x 1
 	'''
 	return net(inputs)
+	
+
+	
 
 def read_data():
-	'''
-	Read the train, dev, and test datasets
-	'''
-	train = pd.read_csv('regression/data/train.csv')
-	dev = pd.read_csv('regression/data/dev.csv')
-	test = pd.read_csv('regression/data/test.csv')
+	X = np.random.uniform(1, 10, size=(10000, 5))
+	z = pd.DataFrame(X, columns = ['0','1','2','3','4'])
+	y = 2*z['0'] + 100*z['1']*2 + z['3']*3 + z['4']
+	y = y.to_numpy()
+	
+	train_input, dev_input,  train_target, dev_target = train_test_split(X, y, test_size=0.20)
 
-	train_target = train['1'].to_numpy()
-	train_input = train.loc[:, '2':'91'].to_numpy()
-
-	dev_target = dev['1'].to_numpy()
-	dev_input = dev.loc[:, '2':'91'].to_numpy()
-
-	test_input = test.loc[:, '2':'91'].to_numpy()
-
-	return train_input, train_target, dev_input, dev_target, test_input
-
+	return train_input, train_target, dev_input, dev_target
+	
 
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 50
-	batch_size = 256
+	max_epochs = 100
+	batch_size = 32
 	learning_rate = 0.001
 	num_layers = 1
 	num_units = 64
 	lamda = 0.1 # Regularization Parameter
 
-	train_input, train_target, dev_input, dev_target, test_input = read_data()
-	net = Net(num_layers, num_units)
+	train_input, train_target, dev_input, dev_target = read_data()
+	net = Net(num_layers, num_units) 
 	optimizer = Optimizer(learning_rate)
 	train(
 		net, optimizer, lamda, batch_size, max_epochs,
 		train_input, train_target,
 		dev_input, dev_target
 	)
-	get_test_data_predictions(net, test_input)
+	regr = LinearRegression()
+  
+	regr.fit(train_input, train_target)
+	print(regr.score(dev_input, dev_target))
+	y_pred = regr.predict(dev_input)
+	skrmse = rmse(dev_target,y_pred)
+	print('RMSE on sk dev data: {:.5f}'.format(skrmse))
+
+
 
 
 if __name__ == '__main__':
