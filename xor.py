@@ -8,7 +8,7 @@ import math
 # The seed will be fixed to 42 for this assigmnet.
 np.random.seed(42)
 
-NUM_FEATS = 90
+NUM_FEATS = 2
 
 class Net(object):
 	'''
@@ -397,20 +397,14 @@ def get_test_data_predictions(net, inputs):
 	
 
 def read_data():
-    train = pd.read_csv('regression/data/train.csv')
-    train=train.to_numpy()
-    train_input=train[:,1:92]
-    train_target=train[:,1:2]
-    dev=pd.read_csv('regression/data/dev.csv')
-    dev=dev.to_numpy()
-    dev_input=dev[:,1:92]
-    dev_target=dev[:,1:2]
-    testValues=pd.read_csv('regression/data/test.csv')
-    test_input=testValues.to_numpy()
-    
+    train_input=np.array([[0,0],[0,1],[1,0],[1,1]])
+    train_target=np.array([0,1,1,0])
+    dev_input=np.array([[0,0],[0,1],[1,0],[1,1]])
+    dev_target=np.array([0,1,1,0])
+
 	
 	
-    return train_input, train_target, dev_input, dev_target, test_input
+    return train_input, train_target, dev_input,dev_target
 	
    
 	
@@ -422,14 +416,14 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 1500
-	batch_size = 256
+	max_epochs = 100
+	batch_size = 4
 	learning_rate = 0.001
-	num_layers = 1
-	num_units = 64
-	lamda = 0.1 # Regularization Parameter
+	num_layers = 2
+	num_units = 4
+	lamda = 0 # Regularization Parameter
 
-	train_input, train_target, dev_input, dev_target, test_input = read_data()
+	train_input, train_target, dev_input, dev_target = read_data()
 	net = Net(num_layers, num_units) 
 	optimizer = Optimizer(learning_rate)
 	train(
@@ -437,7 +431,7 @@ def main():
 		train_input, train_target,
 		dev_input, dev_target
 	)
-	print(get_test_data_predictions(net, test_input))
+	#print(get_test_data_predictions(net, test_input))
 
 
 if __name__ == '__main__':

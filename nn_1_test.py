@@ -360,7 +360,7 @@ def train(
 			# Compute loss for the batch
 			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
 			epoch_loss += batch_loss
-
+		print(e,'  ',epoch_loss)
 			#print(e, i, rmse(batch_target, pred), batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
 		# Hint: You can also compute dev_rmse here and use it in the early
@@ -414,11 +414,11 @@ def main():
 
 	# Hyper-parameters 
 	max_epochs = 3000
-	batch_size = 256
-	learning_rate = 0.001
+	batch_size = 32
+	learning_rate = 0.01
 	num_layers = 2
 	num_units = 64
-	lamda = 0.1 # Regularization Parameter
+	lamda = 0.1# Regularization Parameter
 
 	train_input, train_target, dev_input, dev_target, test_input = read_data()
 	net = Net(num_layers, num_units) 

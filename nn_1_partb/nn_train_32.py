@@ -4,6 +4,8 @@ import os
 import numpy as np
 import pandas as pd
 import math
+from matplotlib import pyplot as plt
+
 
 # The seed will be fixed to 42 for this assigmnet.
 np.random.seed(42)
@@ -339,7 +341,7 @@ def train(
 	'''
 
 	m = train_input.shape[0]
-
+	epoch_losses = []
 	for e in range(max_epochs):
 		epoch_loss = 0.
 		for i in range(0, m, batch_size):
@@ -360,6 +362,7 @@ def train(
 			# Compute loss for the batch
 			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
 			epoch_loss += batch_loss
+		epoch_losses.append([e,epoch_loss])
 
 			#print(e, i, rmse(batch_target, pred), batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
@@ -367,6 +370,11 @@ def train(
 		# 		stopping condition.
 
 	# After running `max_epochs` (for Part 1) epochs OR early stopping (for Part 2), compute the RMSE on dev data.
+	epoch_losses = np.array(epoch_losses)
+	p, q = epoch_losses.T
+	plt.plot(p,q)
+	plt.savefig('../train_32.png')
+
 	dev_pred = net(dev_input)
 	dev_rmse = rmse(dev_target, dev_pred)
 	print('RMSE on dev data: {:.5f}'.format(dev_rmse))
@@ -394,16 +402,16 @@ def get_test_data_predictions(net, inputs):
 	
 
 def read_data():
-	train = pd.read_csv('regression/data/train.csv')	
+	train = pd.read_csv('../regression/data/train.csv')	
 	train = train.to_numpy()
 	train_input = train[:,1:92]
 	train_target = train[:,0:1]
 	
-	dev=pd.read_csv('regression/data/dev.csv')
+	dev=pd.read_csv('../regression/data/dev.csv')
 	dev=dev.to_numpy()
 	dev_input=dev[:,1:92]
 	dev_target=dev[:,0:1]
-	testValues=pd.read_csv('regression/data/test.csv')
+	testValues=pd.read_csv('../regression/data/test.csv')
 	test_input=testValues.to_numpy()
     
 	return train_input, train_target, dev_input, dev_target, test_input
@@ -413,8 +421,8 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 3000
-	batch_size = 256
+	max_epochs = 100
+	batch_size = 32
 	learning_rate = 0.001
 	num_layers = 2
 	num_units = 64
