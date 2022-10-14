@@ -200,34 +200,14 @@ class Optimizer(object):
 			delta_biases: Gradients of biases with respect to loss.
 
 		'''
+        		
 		
 		
-		if(self.t==0):
-			for (dw,db) in zip(delta_weights,delta_biases):
-				self.v_dw.append(np.full_like(dw,0))
-				self.v_db.append(np.full_like(db,0))
-				self.s_dw.append(np.full_like(dw,0))
-				self.s_db.append(np.full_like(db,0))
 
-		self.t+=1		
-		
-		for j, (delta_weight,delta_bias) in enumerate(zip(delta_weights,delta_biases)):
-			self.v_dw[j]=self.B*self.v_dw[j]+(1-self.B)*(delta_weight)
-			self.v_db[j]=self.B*self.v_db[j]+(1-self.B)*(delta_bias)	
-			self.s_dw[j]=self.Y*self.s_dw[j]+(1-self.Y)*(delta_weight**2)
-			self.s_db[j]=self.Y*self.s_db[j]+(1-self.Y)*(delta_bias**2)
 			
-		    #bias correction
-			v_dw_correct=self.v_dw[j]/(1-self.B**self.t)
-			v_db_correct=self.v_db[j]/(1-self.B**self.t)
-			s_dw_correct=self.s_dw[j]/(1-self.Y**self.t)
-			s_db_correct=self.s_db[j]/(1-self.Y**self.t)
-
-			##update weights and biases
-			weights[j]=weights[j]-self.learning_rate*(v_dw_correct/(np.sqrt(s_dw_correct+self.epsilon)))
-			biases[j]=biases[j]-self.learning_rate*(v_db_correct/(np.sqrt(s_db_correct+self.epsilon)))
+			
 		    
-		return weights,biases
+    
 
 
 		
@@ -342,8 +322,6 @@ def train(
 
 	for e in range(max_epochs):
 		epoch_loss = 0.
-		#correct = 0
-		#incorrect = 0
 		for i in range(0, m, batch_size):
 			batch_input = train_input[i:i+batch_size]
 			batch_target = train_target[i:i+batch_size]
@@ -361,12 +339,9 @@ def train(
 
 			# Compute loss for the batch
 			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
-			#correct += np.sum(pred==batch_target)
-			#incorrect += np.sum(pred!=batch_target)
-			#print(batch_target,pred)
 			epoch_loss += batch_loss
-		#print(f'Accuracy = {correct/(correct+incorrect)}')
-			print(e, i, rmse(batch_target, pred), batch_loss)
+		print(e,'  ',epoch_loss)
+			#print(e, i, rmse(batch_target, pred), batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
 		# Hint: You can also compute dev_rmse here and use it in the early
 		# 		stopping condition.
@@ -418,12 +393,12 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 1000
+	max_epochs = 3000
 	batch_size = 32
-	learning_rate = 0.001
+	learning_rate = 0.01
 	num_layers = 2
 	num_units = 64
-	lamda = 0.1 # Regularization Parameter
+	lamda = 0.1# Regularization Parameter
 
 	train_input, train_target, dev_input, dev_target, test_input = read_data()
 	net = Net(num_layers, num_units) 

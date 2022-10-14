@@ -360,8 +360,10 @@ def train(
 			net.biases = biases_updated
 
 			# Compute loss for the batch
-			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
-			epoch_loss += batch_loss
+		dev_pred = net(dev_input)
+		epoch_loss = rmse(dev_target, dev_pred)
+		print(e,' ',epoch_loss)
+
 		epoch_losses.append([e,epoch_loss])
 
 			#print(e, i, rmse(batch_target, pred), batch_loss)
@@ -373,7 +375,7 @@ def train(
 	epoch_losses = np.array(epoch_losses)
 	p, q = epoch_losses.T
 	plt.plot(p,q)
-	plt.savefig('../train_64.png')
+	plt.savefig('../dev_32.png')
 
 	dev_pred = net(dev_input)
 	dev_rmse = rmse(dev_target, dev_pred)
@@ -422,10 +424,10 @@ def main():
 
 	# Hyper-parameters 
 	max_epochs = 100
-	batch_size = 64
+	batch_size = 32
 	learning_rate = 0.001
-	num_layers = 2
-	num_units = 64
+	num_layers = 3
+	num_units = 16
 	lamda = 0.1 # Regularization Parameter
 
 	train_input, train_target, dev_input, dev_target, test_input = read_data()

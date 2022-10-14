@@ -179,61 +179,17 @@ class Optimizer(object):
 		optimizer.
 		'''
 		
-		self.B=B
-		self.Y=Y		
-		self.epsilon=epsilon
+		
 		self.learning_rate=learning_rate	
-		self.v_dw=[]
-		self.s_dw=[]
-		self.v_db=[]
-		self.s_db=[]
-		self.t=0
-
+		
 
 	def step(self, weights, biases, delta_weights, delta_biases):
-		'''
-		Parameters
-		----------
-			weights: Current weights of the network.
-			biases: Current biases of the network.
-			delta_weights: Gradients of weights with respect to loss.
-			delta_biases: Gradients of biases with respect to loss.
-
-		'''
 		
-		
-		if(self.t==0):
-			for (dw,db) in zip(delta_weights,delta_biases):
-				self.v_dw.append(np.full_like(dw,0))
-				self.v_db.append(np.full_like(db,0))
-				self.s_dw.append(np.full_like(dw,0))
-				self.s_db.append(np.full_like(db,0))
-
-		self.t+=1		
-		
-		for j, (delta_weight,delta_bias) in enumerate(zip(delta_weights,delta_biases)):
-			self.v_dw[j]=self.B*self.v_dw[j]+(1-self.B)*(delta_weight)
-			self.v_db[j]=self.B*self.v_db[j]+(1-self.B)*(delta_bias)	
-			self.s_dw[j]=self.Y*self.s_dw[j]+(1-self.Y)*(delta_weight**2)
-			self.s_db[j]=self.Y*self.s_db[j]+(1-self.Y)*(delta_bias**2)
-			
-		    #bias correction
-			v_dw_correct=self.v_dw[j]/(1-self.B**self.t)
-			v_db_correct=self.v_db[j]/(1-self.B**self.t)
-			s_dw_correct=self.s_dw[j]/(1-self.Y**self.t)
-			s_db_correct=self.s_db[j]/(1-self.Y**self.t)
-
-			##update weights and biases
-			weights[j]=weights[j]-self.learning_rate*(v_dw_correct/(np.sqrt(s_dw_correct+self.epsilon)))
-			biases[j]=biases[j]-self.learning_rate*(v_db_correct/(np.sqrt(s_db_correct+self.epsilon)))
-		    
-		return weights,biases
-
 
 		
 
 
-def loss_mse(y, y_hat):
+    def loss_mse(y, y_hat):
 	'''
 	Compute Mean Squared Error (MSE) loss betwee ground-truth and predicted values.
 
