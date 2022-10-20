@@ -4,6 +4,8 @@ import os
 import numpy as np
 import pandas as pd
 import math
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 # The seed will be fixed to 42 for this assigmnet.
 np.random.seed(42)
@@ -55,8 +57,7 @@ class Net(object):
 		# Output layer
 		self.biases.append(np.random.uniform(-1, 1, size=(1, 1)))
 		self.weights.append(np.random.uniform(-1, 1, size=(self.num_units, 1)))
-		#print(self.biases)
-
+		
 
 	def activation(self,h):
 		return np.maximum(0,h)
@@ -104,6 +105,8 @@ class Net(object):
 
 			else: # No activation for the output layer
 				a=h
+		#print(activations)
+		#print(a)		
 		return [activations,a]
 
 
@@ -167,7 +170,7 @@ class Optimizer(object):
 	eps : 1e-8
 	'''
 
-	def __init__(self, learning_rate,B=0.9,Y=0.999,epsilon=1e-8):
+	def __init__(self, learning_rate):
 		'''
 		Create a Gradient Descent based optimizer with given
 		learning rate.
@@ -179,15 +182,9 @@ class Optimizer(object):
 		optimizer.
 		'''
 		
-		self.B=B
-		self.Y=Y		
-		self.epsilon=epsilon
+	
 		self.learning_rate=learning_rate	
-		self.v_dw=[]
-		self.s_dw=[]
-		self.v_db=[]
-		self.s_db=[]
-		self.t=0
+		
 
 
 	def step(self, weights, biases, delta_weights, delta_biases):
@@ -200,6 +197,14 @@ class Optimizer(object):
 			delta_biases: Gradients of biases with respect to loss.
 
 		'''
+		for i,(weight ,delta_weight) in enumerate(zip(weights,delta_weights)):
+			weights[i]=weights[i]-self.learning_rate*delta_weights[i]
+		y=0
+		for i,(bias,delta_bias) in enumerate(zip(biases,delta_biases)):
+			biases[i]=biases[i]-self.learning_rate*delta_biases[i]
+		return weights,biases   
+		    
+
         		
 		
 		
@@ -326,9 +331,12 @@ def train(
 			batch_input = train_input[i:i+batch_size]
 			batch_target = train_target[i:i+batch_size]
 			pred = net(batch_input)
+			print(pred)
+			print(batch_target)
 
 			# Compute gradients of loss w.r.t. weights and biases
 			dW, db = net.backward(batch_input, batch_target, lamda)
+			print(dW,db)
 
 			# Get updated weights based on current weights and gradients
 			weights_updated, biases_updated = optimizer.step(net.weights, net.biases, dW, db)
@@ -349,7 +357,7 @@ def train(
 	# After running `max_epochs` (for Part 1) epochs OR early stopping (for Part 2), compute the RMSE on dev data.
 	dev_pred = net(dev_input)
 	dev_rmse = rmse(dev_target, dev_pred)
-	print('RMSE on dev data: {:.5f}'.format(dev_rmse))
+	#print('RMSE on dev data: {:.5f}'.format(dev_rmse))
 
 
 def get_test_data_predictions(net, inputs):
@@ -374,29 +382,32 @@ def get_test_data_predictions(net, inputs):
 	
 
 def read_data():
-	train = pd.read_csv('regression/data/train.csv')	
-	train = train.to_numpy()
-	train_input = train[:,1:92]
-	train_target = train[:,0:1]
+    sc = StandardScaler()
+    train = pd.read_csv('../regression/data/train.csv')	
+    train = train.to_numpy()
+    train_input = train[:,1:92]
+    train_input = sc.fit_transform(train_input)
+    train_target = train[:,0:1]
 	
-	dev=pd.read_csv('regression/data/dev.csv')
-	dev=dev.to_numpy()
-	dev_input=dev[:,1:92]
-	dev_target=dev[:,0:1]
-	testValues=pd.read_csv('regression/data/test.csv')
-	test_input=testValues.to_numpy()
-    
-	return train_input, train_target, dev_input, dev_target, test_input
+    dev=pd.read_csv('../regression/data/dev.csv')
+    dev=dev.to_numpy()
+    dev_input=dev[:,1:92]
+    dev_input = sc.transform(dev_input)
+    dev_target=dev[:,0:1]
+    testValues=pd.read_csv('../regression/data/test.csv')
+    test_input=testValues.to_numpy()
+    test_input = sc.transform(test_input)
+    return train_input, train_target, dev_input, dev_target, test_input
 	
 
 
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 3000
+	max_epochs = 1
 	batch_size = 32
-	learning_rate = 0.01
-	num_layers = 2
+	learning_rate = 0.001
+	num_layers = 1
 	num_units = 64
 	lamda = 0.1# Regularization Parameter
 
@@ -408,7 +419,7 @@ def main():
 		train_input, train_target,
 		dev_input, dev_target
 	)
-	print(get_test_data_predictions(net, test_input))
+	#print(get_test_data_predictions(net, test_input))
 
 
 if __name__ == '__main__':

@@ -423,12 +423,12 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 700
-	batch_size = 32
+	max_epochs = 100
+	batch_size = 64
 	learning_rate = 0.001
-	num_layers = 3
-	num_units = 16
-	lamda = 0.1 # Regularization Parameter
+	num_layers = 2
+	num_units = 64
+	lamda = 0.01 # Regularization Parameter
 
 	train_input, train_target, dev_input, dev_target, test_input = read_data()
 	net = Net(num_layers, num_units) 

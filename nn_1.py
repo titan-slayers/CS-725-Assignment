@@ -366,7 +366,7 @@ def train(
 			#print(batch_target,pred)
 			epoch_loss += batch_loss
 		#print(f'Accuracy = {correct/(correct+incorrect)}')
-			print(e, i, rmse(batch_target, pred), batch_loss)
+			#print(e, i, rmse(batch_target, batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
 		# Hint: You can also compute dev_rmse here and use it in the early
 		# 		stopping condition.
@@ -418,11 +418,11 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 1000
-	batch_size = 32
+	max_epochs = 200
+	batch_size = 16
 	learning_rate = 0.001
 	num_layers = 2
-	num_units = 64
+	num_units = 32
 	lamda = 0.1 # Regularization Parameter
 
 	train_input, train_target, dev_input, dev_target, test_input = read_data()

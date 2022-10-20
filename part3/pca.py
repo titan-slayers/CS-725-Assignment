@@ -31,10 +31,10 @@ def read_data():
     print(np.cumsum(pca.explained_variance_ratio_ * 100))
     components = len(pca.explained_variance_ratio_)
     print(f'Number of components: {components}')
-    # Make the scree plot
-    plt.plot(range(1, components + 1), np.cumsum(pca.explained_variance_ratio_ * 100))
-    plt.xlabel("Number of components")
-    plt.ylabel("Explained variance (%)")
+
+    train_input = pca.fit_transform(train_input)
+    dev_input = pca.transform(dev_input)
+    test_input = pca.transform(test_input)
 
     return train_input, train_target, dev_input, dev_target, test_input
 
