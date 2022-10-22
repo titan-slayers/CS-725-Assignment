@@ -89,3 +89,25 @@ RMSE on Test data 11.179602600791656
 
 
 
+epoch 200 (54)
+batch size 8
+learning rate 0.002
+Num Layers 2
+Num Units 32
+RMSE on Train data 10.43324256873985
+RMSE on Dev data 10.256032314233012
+RMSE on Test data 10.750770206111048
+
+
+
+epoch 200
+batch size 8
+learning rate 0.002
+Num Layers 2
+Num Units 32
+RMSE on Train data 9.96595724783488
+RMSE on Dev data 9.826760337036012
+RMSE on Test data 10.27531433425342
+
+
+

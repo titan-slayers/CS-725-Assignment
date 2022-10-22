@@ -395,7 +395,7 @@ def train(
         else:
             count += 1
 
-        if count == 20:
+        if count == 50:
             net.weights = np.load('checkpoints/weights/epoch_'+str(min_rmse_epoch)+'.npy',allow_pickle=True)
             net.biases = np.load('checkpoints/biases/epoch_'+str(min_rmse_epoch)+'.npy',allow_pickle=True)
             print('Best number of epochs : ',min_rmse_epoch)
@@ -471,7 +471,7 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-    max_epochs = 200
+    max_epochs = 1000
     batch_size = 8
     learning_rate = 0.002
     num_layers = 2
