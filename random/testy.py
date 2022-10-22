@@ -1,9 +1,12 @@
 from cgi import test
+from cmath import nan
 import sys
 import os
 import numpy as np
 import pandas as pd
 import math
+from sklearn.preprocessing import StandardScaler
+
 
 # The seed will be fixed to 42 for this assigmnet.
 np.random.seed(42)
@@ -179,17 +182,51 @@ class Optimizer(object):
 		optimizer.
 		'''
 		
-		
+		self.B=B
+		self.Y=Y		
+		self.epsilon=epsilon
 		self.learning_rate=learning_rate	
-		
+		self.v_dw=[]
+		self.s_dw=[]
+		self.v_db=[]
+		self.s_db=[]
+		self.t=0
+
 
 	def step(self, weights, biases, delta_weights, delta_biases):
+		'''
+		Parameters
+		----------
+			weights: Current weights of the network.
+			biases: Current biases of the network.
+			delta_weights: Gradients of weights with respect to loss.
+			delta_biases: Gradients of biases with respect to loss.
+
+		'''
+		
+		
+		if(self.t==0):
+			for (dw,db) in zip(delta_weights,delta_biases):
+				self.v_dw.append(np.full_like(dw,0))
+				self.v_db.append(np.full_like(db,0))
+				self.s_dw.append(np.full_like(dw,0))
+				self.s_db.append(np.full_like(db,0))
+
+		self.t+=1		
+		
+		for j, (delta_weight,delta_bias) in enumerate(zip(delta_weights,delta_biases)):
+
+			##update weights and biases
+			weights[j]=weights[j]-self.learning_rate*delta_weight
+			biases[j]=biases[j]-self.learning_rate*delta_bias
+		    
+		return weights,biases
+
+
 		
 
-		
 
-
-    def loss_mse(y, y_hat):
+def loss_mse(y, y_hat):
 	'''
 	Compute Mean Squared Error (MSE) loss betwee ground-truth and predicted values.
 
@@ -203,7 +240,11 @@ class Optimizer(object):
 		MSE loss between y and y_hat.
 
 	'''
-	return np.mean((y-y_hat)**2)
+
+	x =  np.mean((y-y_hat)**2)
+	return x
+
+	
 
 	
 
@@ -221,10 +262,10 @@ def loss_regularization(weights, biases):
 	'''
 	loss_reg=0
 	for entry in weights:
-		loss_reg=loss_reg+np.sum(np.power(entry,2))
+		loss_reg=loss_reg+np.sum(entry**2)
 	return loss_reg
 	
-def loss_fn(y, y_hat, weights, biases, lamda):
+def loss_fn(y, y_hat, weights, biases, lamda,e,i):
 	'''s
 	Compute loss =  loss_mse(..) + lamda * loss_regularization(..)
 
@@ -241,6 +282,15 @@ def loss_fn(y, y_hat, weights, biases, lamda):
 	'''
 	loss=loss_mse(y,y_hat)
 	reg=loss_regularization(weights,biases)
+
+	if e==0 and i== 192:
+		print(weights)
+		#exit()
+
+	if np.isnan(reg):
+		print(e,'  ',i,'  \n\n')
+		print(weights)
+		#exit()
 	loss_f=loss+ lamda*reg
 	return loss_f
 	
@@ -307,22 +357,26 @@ def train(
 
 			# Compute gradients of loss w.r.t. weights and biases
 			dW, db = net.backward(batch_input, batch_target, lamda)
+			
 
 			# Get updated weights based on current weights and gradients
 			weights_updated, biases_updated = optimizer.step(net.weights, net.biases, dW, db)
+			
+
 
 			# Update model's weights and biases
 			net.weights = weights_updated
 			net.biases = biases_updated
+			
 
 			# Compute loss for the batch
-			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
+			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda,e,i)
 			#correct += np.sum(pred==batch_target)
 			#incorrect += np.sum(pred!=batch_target)
 			#print(batch_target,pred)
 			epoch_loss += batch_loss
 		#print(f'Accuracy = {correct/(correct+incorrect)}')
-			print(e, i, rmse(batch_target, pred), batch_loss)
+			#print(e, i, rmse(batch_target, pred), batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
 		# Hint: You can also compute dev_rmse here and use it in the early
 		# 		stopping condition.
@@ -355,17 +409,25 @@ def get_test_data_predictions(net, inputs):
 	
 
 def read_data():
-	train = pd.read_csv('regression/data/train.csv')	
+	sc = StandardScaler()
+	train = pd.read_csv('../regression/data/train.csv')	
 	train = train.to_numpy()
 	train_input = train[:,1:92]
+	train_input = sc.fit_transform(train_input)
 	train_target = train[:,0:1]
 	
-	dev=pd.read_csv('regression/data/dev.csv')
+	
+	dev=pd.read_csv('../regression/data/dev.csv')
 	dev=dev.to_numpy()
 	dev_input=dev[:,1:92]
+	dev_input = sc.transform(dev_input)
+
 	dev_target=dev[:,0:1]
-	testValues=pd.read_csv('regression/data/test.csv')
+	
+
+	testValues=pd.read_csv('../regression/data/test.csv')
 	test_input=testValues.to_numpy()
+	test_input = sc.transform(test_input)
     
 	return train_input, train_target, dev_input, dev_target, test_input
 	
@@ -374,14 +436,15 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 1000
-	batch_size = 32
-	learning_rate = 0.001
-	num_layers = 2
-	num_units = 64
-	lamda = 0.1 # Regularization Parameter
-
 	train_input, train_target, dev_input, dev_target, test_input = read_data()
+
+	max_epochs = 6
+	batch_size = train_input.shape[0]
+	learning_rate = 0.001
+	num_layers = 0
+	num_units = 16
+	lamda = 1# Regularization Parameter
+
 	net = Net(num_layers, num_units) 
 	optimizer = Optimizer(learning_rate)
 	train(
@@ -389,7 +452,7 @@ def main():
 		train_input, train_target,
 		dev_input, dev_target
 	)
-	print(get_test_data_predictions(net, test_input))
+	#print(get_test_data_predictions(net, test_input))
 
 
 if __name__ == '__main__':
