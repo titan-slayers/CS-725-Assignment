@@ -354,9 +354,12 @@ def train(
 
 			# Compute gradients of loss w.r.t. weights and biases
 			dW, db = net.backward(batch_input, batch_target, lamda)
+			
 
 			# Get updated weights based on current weights and gradients
 			weights_updated, biases_updated = optimizer.step(net.weights, net.biases, dW, db)
+			print(weights_updated)
+			exit()
 
 			# Update model's weights and biases
 			net.weights = weights_updated
@@ -383,6 +386,13 @@ def train(
 	dev_pred = net(dev_input)
 	dev_rmse = rmse(dev_target, dev_pred)
 	print('RMSE on dev data: {:.5f}'.format(dev_rmse))
+
+	pred = net(train_input)
+	train_rmse = rmse(train_target,pred)
+	print('RMSE on train data: {:.5f}'.format(train_rmse))
+
+	#for x,y in zip(dev_target,dev_pred):
+		#print(x,'   ',y,'   ',x-y)
 
 
 def get_test_data_predictions(net, inputs):
@@ -445,11 +455,11 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-    max_epochs = 200
+    max_epochs = 100
     batch_size = 32
     learning_rate = 0.001
     num_layers = 3
-    num_units = 16
+    num_units = 32
     lamda = 0.1 # Regularization Parameter
     train_input, train_target, dev_input, dev_target, test_input = read_data()
     print(NUM_FEATS)
@@ -460,7 +470,7 @@ def main():
 		train_input, train_target,
 		dev_input, dev_target
 	)
-    print(get_test_data_predictions(net, test_input))
+    #print(get_test_data_predictions(net, test_input))
 
 
 if __name__ == '__main__':
