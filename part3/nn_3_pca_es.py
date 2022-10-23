@@ -223,7 +223,7 @@ class Optimizer(object):
 			self.s_dw[j]=self.Y*self.s_dw[j]+(1-self.Y)*(delta_weight**2)
 			self.s_db[j]=self.Y*self.s_db[j]+(1-self.Y)*(delta_bias**2)
 			
-		    #bias correction
+			#bias correction
 			v_dw_correct=self.v_dw[j]/(1-self.B**self.t)
 			v_db_correct=self.v_db[j]/(1-self.B**self.t)
 			s_dw_correct=self.s_dw[j]/(1-self.Y**self.t)
@@ -232,7 +232,7 @@ class Optimizer(object):
 			##update weights and biases
 			weights[j]=weights[j]-self.learning_rate*(v_dw_correct/(np.sqrt(s_dw_correct+self.epsilon)))
 			biases[j]=biases[j]-self.learning_rate*(v_db_correct/(np.sqrt(s_db_correct+self.epsilon)))
-		    
+			
 		return weights,biases
 
 
@@ -331,82 +331,82 @@ def train(
 	train_input, train_target,
 	dev_input, dev_target
 ):
-    '''
-    In this function, you will perform following steps:
-        1. Run gradient descent algorithm for `max_epochs` epochs.
-        2. For each bach of the training data
-            1.1 Compute gradients
-            1.2 Update weights and biases using step() of optimizer.
-        3. Compute RMSE on dev data after running `max_epochs` epochs.
+	'''
+	In this function, you will perform following steps:
+		1. Run gradient descent algorithm for `max_epochs` epochs.
+		2. For each bach of the training data
+			1.1 Compute gradients
+			1.2 Update weights and biases using step() of optimizer.
+		3. Compute RMSE on dev data after running `max_epochs` epochs.
 
-    Here we have added the code to loop over batches and perform backward pass
-    for each batch in the loop.
-    For this code also, you are free to heavily modify it.
-    '''
+	Here we have added the code to loop over batches and perform backward pass
+	for each batch in the loop.
+	For this code also, you are free to heavily modify it.
+	'''
 
-    m = train_input.shape[0]
-    epoch_losses = []
-    count = 0
-    for e in range(max_epochs):
-        epoch_loss = 0.
-        for i in range(0, m, batch_size):
-            batch_input = train_input[i:i+batch_size]
-            batch_target = train_target[i:i+batch_size]
-            pred = net(batch_input)
+	m = train_input.shape[0]
+	epoch_losses = []
+	count = 0
+	for e in range(max_epochs):
+		epoch_loss = 0.
+		for i in range(0, m, batch_size):
+			batch_input = train_input[i:i+batch_size]
+			batch_target = train_target[i:i+batch_size]
+			pred = net(batch_input)
 
-            # Compute gradients of loss w.r.t. weights and biases
-            dW, db = net.backward(batch_input, batch_target, lamda)
-            
+			# Compute gradients of loss w.r.t. weights and biases
+			dW, db = net.backward(batch_input, batch_target, lamda)
+			
 
-            # Get updated weights based on current weights and gradients
-            weights_updated, biases_updated = optimizer.step(net.weights, net.biases, dW, db)
+			# Get updated weights based on current weights and gradients
+			weights_updated, biases_updated = optimizer.step(net.weights, net.biases, dW, db)
 
-            # Update model's weights and biases
-            net.weights = weights_updated
-            net.biases = biases_updated
+			# Update model's weights and biases
+			net.weights = weights_updated
+			net.biases = biases_updated
 
-            # Compute loss for the batch
-            batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
-            epoch_loss += batch_loss
+			# Compute loss for the batch
+			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
+			epoch_loss += batch_loss
 
-        print(e,' ',epoch_loss)
-        epoch_losses.append([e,epoch_loss])
+		print(e,' ',epoch_loss)
+		epoch_losses.append([e,epoch_loss])
 
-        weightpath = 'checkpoints/weights/epoch_'+str(e)
-        biaspath = 'checkpoints/biases/epoch_'+str(e)
+		weightpath = 'checkpoints/weights/epoch_'+str(e)
+		biaspath = 'checkpoints/biases/epoch_'+str(e)
 
-        np.save(weightpath,net.weights)
-        np.save(biaspath,net.biases)
+		np.save(weightpath,net.weights)
+		np.save(biaspath,net.biases)
 
-        if e == 0:
-            dev_pred = net(dev_input)
-            min_rmse = rmse(dev_target, dev_pred)
-            min_rmse_epoch = 0
-            continue
-        
-        dev_pred = net(dev_input)
-        dev_rmse_current = rmse(dev_target, dev_pred)
+		if e == 0:
+			dev_pred = net(dev_input)
+			min_rmse = rmse(dev_target, dev_pred)
+			min_rmse_epoch = 0
+			continue
+		
+		dev_pred = net(dev_input)
+		dev_rmse_current = rmse(dev_target, dev_pred)
 
 
-        if dev_rmse_current < min_rmse:
-            min_rmse = dev_rmse_current
-            min_rmse_epoch = e
-            count = 0
-        else:
-            count += 1
+		if dev_rmse_current < min_rmse:
+			min_rmse = dev_rmse_current
+			min_rmse_epoch = e
+			count = 0
+		else:
+			count += 1
 
-        if count == 50:
-            net.weights = np.load('checkpoints/weights/epoch_'+str(min_rmse_epoch)+'.npy',allow_pickle=True)
-            net.biases = np.load('checkpoints/biases/epoch_'+str(min_rmse_epoch)+'.npy',allow_pickle=True)
-            print('Best number of epochs : ',min_rmse_epoch)
-            return
+		if count == 100:
+			net.weights = np.load('checkpoints/weights/epoch_'+str(min_rmse_epoch)+'.npy',allow_pickle=True)
+			net.biases = np.load('checkpoints/biases/epoch_'+str(min_rmse_epoch)+'.npy',allow_pickle=True)
+			print('Best number of epochs : ',min_rmse_epoch)
+			return
 
 			#print(e, i, rmse(batch_target, pred), batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
 		# Hint: You can also compute dev_rmse here and use it in the early
 		# 		stopping condition.
 
-        # After running `max_epochs` (for Part 1) epochs OR early stopping (for Part 2), compute the RMSE on dev data.
+		# After running `max_epochs` (for Part 1) epochs OR early stopping (for Part 2), compute the RMSE on dev data.
 
 def get_test_data_predictions(net, inputs):
 	'''
@@ -430,76 +430,76 @@ def get_test_data_predictions(net, inputs):
 	
 
 def read_data():
-    global NUM_FEATS
+	global NUM_FEATS
 
-    sc = StandardScaler()
-    train = pd.read_csv('../regression/data/train.csv')	
-    train = train.to_numpy()
-    train_input = train[:,1:92]
-    train_input = sc.fit_transform(train_input)
-    train_target = train[:,0:1]
+	sc = StandardScaler()
+	train = pd.read_csv('../regression/data/train.csv')	
+	train = train.to_numpy()
+	train_input = train[:,1:92]
+	train_input = sc.fit_transform(train_input)
+	train_target = train[:,0:1]
 	
-    dev=pd.read_csv('../regression/data/dev.csv')
-    dev=dev.to_numpy()
-    dev_input=dev[:,1:92]
-    dev_input = sc.transform(dev_input)
-    dev_target=dev[:,0:1]
+	dev=pd.read_csv('../regression/data/dev.csv')
+	dev=dev.to_numpy()
+	dev_input=dev[:,1:92]
+	dev_input = sc.transform(dev_input)
+	dev_target=dev[:,0:1]
 
-    test=pd.read_csv('../regression/data/test.csv')
-    test=test.to_numpy()
-    test_input=test[:,1:92]
-    test_input = sc.transform(test_input)
-    test_target=test[:,0:1]
+	test=pd.read_csv('../regression/data/test.csv')
+	test=test.to_numpy()
+	test_input=test[:,1:92]
+	test_input = sc.transform(test_input)
+	test_target=test[:,0:1]
 
-    pca = PCA(n_components = 0.99)
-    pca.fit(train_input)
-    #print("Cumulative Variances (Percentage):")
-    print(np.cumsum(pca.explained_variance_ratio_ * 100))
-    components = len(pca.explained_variance_ratio_)
-    print(f'Number of components: {components}')
+	pca = PCA(n_components = 0.999)
+	pca.fit(train_input)
+	#print("Cumulative Variances (Percentage):")
+	print(np.cumsum(pca.explained_variance_ratio_ * 100))
+	components = len(pca.explained_variance_ratio_)
+	print(f'Number of components: {components}')
 
-    train_input = pca.fit_transform(train_input)
-    dev_input = pca.transform(dev_input)
-    test_input = pca.transform(test_input)
+	train_input = pca.fit_transform(train_input)
+	dev_input = pca.transform(dev_input)
+	test_input = pca.transform(test_input)
 
-    NUM_FEATS = components
+	NUM_FEATS = components
 
-    return train_input, train_target, dev_input, dev_target, test_input, test_target
+	return train_input, train_target, dev_input, dev_target, test_input, test_target
 	
 
 
 def main():
 
 	# Hyper-parameters 
-    max_epochs = 1000
-    batch_size = 8
-    learning_rate = 0.002
-    num_layers = 2
-    num_units = 32
-    lamda = 0.1 # Regularization Parameter
-    train_input, train_target, dev_input, dev_target, test_input, test_target = read_data()
-    net = Net(num_layers, num_units) 
-    optimizer = Optimizer(learning_rate)
-    train(
+	max_epochs = 1000
+	batch_size = 8
+	learning_rate = 0.002
+	num_layers = 2
+	num_units = 32
+	lamda = 0.1 # Regularization Parameter
+	train_input, train_target, dev_input, dev_target, test_input, test_target = read_data()
+	net = Net(num_layers, num_units) 
+	optimizer = Optimizer(learning_rate)
+	train(
 		net, optimizer, lamda, batch_size, max_epochs,
 		train_input, train_target,
 		dev_input, dev_target
 	)
-    #print(get_test_data_predictions(net, test_input))
+	#print(get_test_data_predictions(net, test_input))
 
-    dev_pred = net(dev_input)
-    dev_rmse = rmse(dev_target, dev_pred)
+	dev_pred = net(dev_input)
+	dev_rmse = rmse(dev_target, dev_pred)
 
-    train_pred = net(train_input)
-    train_rmse = rmse(train_target, train_pred)
+	train_pred = net(train_input)
+	train_rmse = rmse(train_target, train_pred)
 
-    test_pred = net(test_input)
-    test_rmse = rmse(test_target, test_pred)
+	test_pred = net(test_input)
+	test_rmse = rmse(test_target, test_pred)
 
-    f = open("logs.txt","a")
-    L = ['epoch '+ str(max_epochs),'\nbatch size '+ str(batch_size),'\nlearning rate '+ str(learning_rate),'\nNum Layers '+ str(num_layers),'\nNum Units '+ str(num_units),'\nRMSE on Train data ' + str(train_rmse), '\nRMSE on Dev data ' + str(dev_rmse),'\nRMSE on Test data ' + str(test_rmse)+ '\n\n\n\n']
-    f.writelines(L)
-    f.close()
+	f = open("logs.txt","a")
+	L = ['epoch '+ str(max_epochs),'\nbatch size '+ str(batch_size),'\nlearning rate '+ str(learning_rate),'\nNum Layers '+ str(num_layers),'\nNum Units '+ str(num_units),'\nRMSE on Train data ' + str(train_rmse), '\nRMSE on Dev data ' + str(dev_rmse),'\nRMSE on Test data ' + str(test_rmse)+ '\n\n\n\n']
+	f.writelines(L)
+	f.close()
 
 
 if __name__ == '__main__':

@@ -345,6 +345,10 @@ def train(
 
 	m = train_input.shape[0]
 	epoch_losses = []
+	f = open("logs.txt","a")
+   
+    
+   
 	for e in range(max_epochs):
 		epoch_loss = 0.
 		for i in range(0, m, batch_size):
@@ -371,6 +375,8 @@ def train(
 
 		print(e,' ',epoch_loss)
 		epoch_losses.append([e,epoch_loss])
+		f.write(e, epoch_loss)
+		
 
 			#print(e, i, rmse(batch_target, pred), batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
@@ -471,6 +477,8 @@ def main():
 		dev_input, dev_target
 	)
     #print(get_test_data_predictions(net, test_input))
+    
+
 
 
 if __name__ == '__main__':

@@ -405,23 +405,23 @@ def get_test_data_predictions(net, inputs):
 def read_data():
     global NUM_FEATS
 
-    sc = StandardScaler()
+    #sc = StandardScaler()
     train = pd.read_csv('../regression/data/train.csv')	
     train = train.to_numpy()
     train_input = train[:,1:92]
-    train_input = sc.fit_transform(train_input)
+    #train_input = sc.fit_transform(train_input)
     train_target = train[:,0:1]
 	
     dev=pd.read_csv('../regression/data/dev.csv')
     dev=dev.to_numpy()
     dev_input=dev[:,1:92]
-    dev_input = sc.transform(dev_input)
+    #dev_input = sc.transform(dev_input)
     dev_target=dev[:,0:1]
 
     test=pd.read_csv('../regression/data/test.csv')
     test=test.to_numpy()
     test_input=test[:,1:92]
-    test_input = sc.transform(test_input)
+    #test_input = sc.transform(test_input)
     test_target=test[:,0:1]
 
     pca = PCA(n_components = 0.99)
@@ -431,11 +431,11 @@ def read_data():
     components = len(pca.explained_variance_ratio_)
     print(f'Number of components: {components}')
 
-    train_input = pca.fit_transform(train_input)
-    dev_input = pca.transform(dev_input)
-    test_input = pca.transform(test_input)
+    #train_input = pca.fit_transform(train_input)
+    #dev_input = pca.transform(dev_input)
+    #test_input = pca.transform(test_input)
 
-    NUM_FEATS = components
+    #NUM_FEATS = components
 
     return train_input, train_target, dev_input, dev_target, test_input, test_target
 	
@@ -444,11 +444,11 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-    max_epochs = 50
-    batch_size = 8
-    learning_rate = 0.002
+    max_epochs = 5000
+    batch_size = 128
+    learning_rate = 0.001
     num_layers = 2
-    num_units = 32
+    num_units = 64
     lamda = 0.1 # Regularization Parameter
     train_input, train_target, dev_input, dev_target, test_input, test_target = read_data()
     net = Net(num_layers, num_units) 

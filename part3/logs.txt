@@ -111,3 +111,113 @@ RMSE on Test data 10.27531433425342
 
 
 
+epoch 1000 (480)
+batch size 8
+learning rate 0.002
+Num Layers 2
+Num Units 32
+RMSE on Train data 9.600304787356972
+RMSE on Dev data 9.43199394308283
+RMSE on Test data 9.866650402297923
+
+
+
+
+
+epoch 1000 (198)
+batch size 4
+learning rate 0.002
+Num Layers 2
+Num Units 32
+RMSE on Train data 9.696846687899622
+RMSE on Dev data 9.494767363890338
+RMSE on Test data 9.953583944505317
+
+
+
+epoch 1000 (224)
+batch size 8
+learning rate 0.003
+Num Layers 2
+Num Units 32
+RMSE on Train data 9.627400532699832
+RMSE on Dev data 9.472244463848172
+RMSE on Test data 9.889106374884404
+
+
+
+epoch 1000 (274)
+batch size 8
+learning rate 0.003
+Num Layers 2
+Num Units 16
+RMSE on Train data 9.89358398070025
+RMSE on Dev data 9.701486782657476
+RMSE on Test data 10.193684608277875
+
+
+
+epoch 1000
+batch size 8
+learning rate 0.003
+Num Layers 2
+Num Units 64
+RMSE on Train data 9.626747972041215
+RMSE on Dev data 9.454992540925192
+RMSE on Test data 9.871305918388241
+
+
+
+epoch 1000 (184)
+batch size 8
+learning rate 0.003
+Num Layers 3
+Num Units 32
+RMSE on Train data 9.774543352944882
+RMSE on Dev data 9.57277746457134
+RMSE on Test data 10.029079117553133
+
+
+
+epoch 1000 (96)
+batch size 8
+learning rate 0.005
+Num Layers 2
+Num Units 32
+RMSE on Train data 9.857591150548522
+RMSE on Dev data 9.535466738246132
+RMSE on Test data 10.083832806244812
+
+
+epoch 5000 (480)
+batch size 8
+learning rate 0.002
+Num Layers 2
+Num Units 32
+RMSE on Train data 9.600304787356972
+RMSE on Dev data 9.43199394308283
+RMSE on Test data 9.866650402297923
+
+
+epoch 1000 (570)
+batch size 8
+learning rate 0.002
+Num Layers 2
+Num Units 32
+RMSE on Train data 9.536171523495307
+RMSE on Dev data 9.392019811937859
+RMSE on Test data 9.808086154904249
+
+
+
+epoch 5000
+batch size 128
+learning rate 0.001
+Num Layers 2
+Num Units 64
+RMSE on Train data 9.755634477606868
+RMSE on Dev data 9.649268755543476
+RMSE on Test data 10.037171900821296
+
+
+
