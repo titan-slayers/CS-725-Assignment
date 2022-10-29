@@ -1,15 +1,13 @@
 Name,Value
-max_epochs,8
+max_epochs,19
 batch_size,1
 DROPOUT,0.0
 learning_rate,0.001
-num_units,"[78,32,16]"
-num_layers,3
+num_units,"[78]"
+num_layers,1
 lamda,0.0
-n_samples,4
 B,0.9
 Y,0.99
-n_components,0.999
+n_components,0.99
 MinMaxScaler,Scaling of features
-StandardScaler,Scaling of targets
 PCA, For feature selection

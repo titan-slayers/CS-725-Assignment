@@ -2,9 +2,8 @@ import numpy as np
 import pandas as pd
 import math
 from matplotlib import pyplot as plt
-#from sklearn.utils import shuffle
 
-#create shuffle function from sklearn
+
 def shuffle(X, y, random_state=42):
     if random_state:
         np.random.seed(random_state)
@@ -94,6 +93,11 @@ class PCA():
         self.no_features = upper_index + 1
         self.n_components_ = upper_index + 1
         self.features = eigenVecs[:upper_index + 1]
+        columnnames = ['TimbreAvg'+str(i) for i in range(1,12+1)]
+        columnnames.extend(['TimbreCovariance'+str(i) for i in range(1,78+1)])
+        df = pd.DataFrame(self.features,columns = columnnames)
+        df.index = ['PC'+str(i) for i in range(1,self.no_features+1)]
+        df.to_csv('PCA_betas.csv')
 
     def transform(self,X):
         X =  X - self._mean
@@ -460,7 +464,7 @@ def train(
         train_input, train_target = shuffle(train_input, train_target)
         m = train_input.shape[0]
         epoch_loss = 0.
-        print('Train shape',train_input.shape)
+        #print('Train shape',train_input.shape)
         for i in range(0, m, batch_size):
             batch_input = train_input[i:i+batch_size]
             batch_target = train_target[i:i+batch_size]
@@ -484,16 +488,16 @@ def train(
                 #train_target = np.concatenate((train_target,batch_target),axis=0)
             epoch_loss += batch_loss
 
-        print(e,' ',epoch_loss)
+        print('Train epoch',e,' Epoch loss sum of batch loss =',epoch_loss)
         epoch_losses.append([e,epoch_loss])
         dev_pred = net(dev_input)
         dev_pred = sc.inverse_transform(dev_pred)
         dev_target_inv = sc.inverse_transform(dev_target)
         #rounded_pred = np.vectorize(round)(dev_pred)
-        print(dev_target-dev_pred)
+        #print(dev_target-dev_pred)
         #print(dev_pred)
-        dev_rmse = np.mean(np.abs(dev_target_inv-dev_pred))
-        print('Dev MAE: %f' % dev_rmse)
+        #dev_rmse = np.mean(np.abs(dev_target_inv-dev_pred))
+        #print('Dev MAE: %f' % dev_rmse)
         dev_rmse = rmse(dev_target_inv, dev_pred)
         print('Dev RMSE: %f' % dev_rmse)
         #df = np.concatenate((dev_input,dev_target_inv,dev_pred),axis=1)
@@ -549,14 +553,14 @@ def read_data():
     train = pd.read_csv('../regression/data/train.csv')	
     #evenly sample train data based on first column	
     grouped_train = train.groupby(train['1'])
-    ##get 1000 samples from each group
+    ##get 4 samples from each group
     grouped_train = grouped_train.apply(lambda x: x.sample(n=4, replace=True))
     grouped_train = grouped_train.reset_index(drop=True)
     #append to train data
     train = train.append(grouped_train)
     train = train.reset_index(drop=True)
     #train = grouped_train
-    print(train.shape)
+    #print(train.shape)
     train = train.to_numpy()
     train_input = train[:,1:92]
     train_input = mx.fit_transform(train_input)
@@ -567,8 +571,8 @@ def read_data():
     df = pd.DataFrame(train_target_unique)
     #df.to_csv('train_target_unique.csv')
     train_target_absent = set([i for i in range(1922,2011)]) - set(np.unique(train_target)) 
-    print(train_target_absent)
-    print("Min and Max of train target",np.min(train_target),np.max(train_target))
+    #print(train_target_absent)
+    #print("Min and Max of train target",np.min(train_target),np.max(train_target))
     train_target = sc.fit_transform(train_target)
     #Subtract min from target
     #train_target = train_target - np.min(train_target)
@@ -584,7 +588,7 @@ def read_data():
     #save to csv
     df = pd.DataFrame(dev_target_unique)
     #df.to_csv('dev_target_unique.csv')
-    print("Min and Max of dev target",np.min(dev_target),np.max(dev_target))
+    #print("Min and Max of dev target",np.min(dev_target),np.max(dev_target))
     dev_target = sc.transform(dev_target)
     #dev_target = dev_target - np.min(dev_target)
     testValues=pd.read_csv('../regression/data/test.csv')

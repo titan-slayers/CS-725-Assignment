@@ -378,11 +378,11 @@ def train(
         train_pred = net(train_input)
         epoch_loss = loss_fn(train_target, train_pred, net.weights, net.biases, lamda)
         train_loss.append(epoch_loss)
-        print(f'Epochs = {e} Epoch loss = {epoch_loss}')
+        print(f'Epochs = {e} Train Epoch loss sum of batch losses = {epoch_loss}')
         dev_pred = net(dev_input)
         dev_rmse = rmse(dev_target, dev_pred)
         dev_loss.append(dev_rmse)
-        print('RMSE on dev data: {:.5f}'.format(dev_rmse))
+        print('RMSE on dev data in this epoch: {:.5f}'.format(dev_rmse))
     # After running `max_epochs` (for Part 1) epochs OR early stopping (for Part 2), compute the RMSE on dev data.
     dev_pred = net(dev_input)
     dev_rmse = rmse(dev_target, dev_pred)
