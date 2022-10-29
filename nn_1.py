@@ -314,7 +314,13 @@ def cross_entropy_loss(y, y_hat):
     ----------
         cross entropy loss
     '''
-    raise NotImplementedError
+    #Cross entropy loss with clipping to avoid log(0) and log(1)
+    y_hat=np.clip(y_hat,1e-7,1-1e-7)
+    loss =  y*y_hat
+    
+    loss=(np.sum(loss,axis=1))
+    loss = -np.log(loss)
+    return np.mean(loss)
 
 def train(
     net, optimizer, lamda, batch_size, max_epochs,

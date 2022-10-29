@@ -457,7 +457,7 @@ def train(
     epoch_losses = []
     for e in range(max_epochs):
         # Shuffle the training data
-        train_input, train_target = shuffle(train_input, train_target, random_state=0)
+        train_input, train_target = shuffle(train_input, train_target)
         m = train_input.shape[0]
         epoch_loss = 0.
         print('Train shape',train_input.shape)
@@ -627,10 +627,10 @@ def main():
 
     # Hyper-parameters 
     global DROPOUT
-    max_epochs = 5
+    max_epochs = 8
     batch_size = 1
     learning_rate = 0.001
-    num_units = [78,32,8]
+    num_units = [78,32,16]
     num_layers = len(num_units)
     DROPOUT = 0.0
     lamda = 0.0 # Regularization Parameter
@@ -649,7 +649,7 @@ def main():
     df = pd.DataFrame(test_pred,columns=['Predictions'])
     df.index +=1
     df.index.name = 'Id'
-    df.to_csv('test_pred.csv',index=True,columns=['Predictions'])
+    df.to_csv('22m0742.csv',index=True,columns=['Predictions'])
 
 
 
