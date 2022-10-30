@@ -490,7 +490,7 @@ def get_test_data_predictions(net, inputs):
 
 def read_data():
     global NUM_FEATS
-    train = pd.read_csv('../../classification/data/train.csv')	
+    train = pd.read_csv('./classification/data/train.csv')	
     #print count of each class     
     #grouped_train = train.groupby(train['1'])
 	##get 1000 samples from each group
@@ -521,7 +521,7 @@ def read_data():
         if train_target[i,0]=="New":
             train_tar[i,3]=1  
     #print(train_tar)        
-    dev = pd.read_csv('../../classification/data/dev.csv')	
+    dev = pd.read_csv('./classification/data/dev.csv')	
     dev = dev.to_numpy()
     dev_input = dev[:,1:92]
     dev_input = mx.transform(dev_input)
@@ -540,7 +540,7 @@ def read_data():
             dev_tar[i,2]=1  
         if dev_target[i,0]=="New":
             dev_tar[i,3]=1  
-    testValues=pd.read_csv('../../classification/data/test.csv')
+    testValues=pd.read_csv('./classification/data/test.csv')
     test_input=testValues.to_numpy()
     test_input = mx.transform(test_input)
     pca = PCA(n_components = 0.99)

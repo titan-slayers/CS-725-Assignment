@@ -425,16 +425,16 @@ def get_test_data_predictions(net, inputs):
 	
 
 def read_data():
-    train = pd.read_csv('../regression/data/train.csv')	
+    train = pd.read_csv('./regression/data/train.csv')	
     train = train.to_numpy()
     train_input = train[:,1:92]
     train_target = train[:,0:1]
 	
-    dev=pd.read_csv('../regression/data/dev.csv')
+    dev=pd.read_csv('./regression/data/dev.csv')
     dev=dev.to_numpy()
     dev_input=dev[:,1:92]
     dev_target=dev[:,0:1]
-    testValues=pd.read_csv('../regression/data/test.csv')
+    testValues=pd.read_csv('./regression/data/test.csv')
     test_input=testValues.to_numpy()
     
     return train_input, train_target, dev_input, dev_target, test_input

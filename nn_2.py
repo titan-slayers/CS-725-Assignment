@@ -550,7 +550,7 @@ def get_test_data_predictions(net, inputs):
 def read_data():
     global NUM_FEATS
 
-    train = pd.read_csv('../regression/data/train.csv')	
+    train = pd.read_csv('./regression/data/train.csv')	
     #evenly sample train data based on first column	
     grouped_train = train.groupby(train['1'])
     ##get 4 samples from each group
@@ -578,7 +578,7 @@ def read_data():
     #train_target = train_target - np.min(train_target)
 	
     #dev=pd.read_csv('../regression/data/dev.csv')
-    dev=pd.read_csv('../regression/data/dev.csv')
+    dev=pd.read_csv('./regression/data/dev.csv')
     dev=dev.to_numpy()
     dev_input=dev[:,1:92]
     dev_input = mx.transform(dev_input)
@@ -591,7 +591,7 @@ def read_data():
     #print("Min and Max of dev target",np.min(dev_target),np.max(dev_target))
     dev_target = sc.transform(dev_target)
     #dev_target = dev_target - np.min(dev_target)
-    testValues=pd.read_csv('../regression/data/test.csv')
+    testValues=pd.read_csv('./regression/data/test.csv')
     test_input=testValues.to_numpy()
     test_input = mx.transform(test_input)
     
