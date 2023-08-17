@@ -363,7 +363,10 @@ def train(
 			batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
 			epoch_loss += batch_loss
 		print(e,' ',epoch_loss)
-		epoch_losses.append([e,epoch_loss])
+		pred_input = net(train_input)
+		epoch_loss1 = loss_fn(train_target,pred_input,net.weights,net.biases,lamda)
+		epoch_losses.append([e,epoch_loss1])
+		
 
 			#print(e, i, rmse(batch_target, pred), batch_loss)
 		# Write any early stopping conditions required (only for Part 2)
@@ -371,9 +374,13 @@ def train(
 		# 		stopping condition.
 
 	# After running `max_epochs` (for Part 1) epochs OR early stopping (for Part 2), compute the RMSE on dev data.
+	
 	epoch_losses = np.array(epoch_losses)
 	p, q = epoch_losses.T
 	plt.plot(p,q)
+	plt.xlabel("Number of epochs")
+	plt.ylabel("MSE Loss with L2 regularization")
+	plt.legend()
 	plt.savefig('../train_64.png')
 
 	dev_pred = net(dev_input)

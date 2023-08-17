@@ -86,6 +86,12 @@ class Net(object):
                output=self.softmax(h)
 
         return [activations,output]
+    def derivative_relu(self,h):
+        t=np.copy(h)
+            
+        t[t>0]=1
+        t[t<=0]=0
+        return t    
 
 
     def backward(self, X, y, lamda):
@@ -123,7 +129,9 @@ class Net(object):
             delB=np.sum(delY,axis=0)
             delB = np.reshape(delB,(len(delB),1))
             delX=np.dot(delY,w.T)
-            delY=delX
+            delder = self.derivative_relu(a)
+            delY=delX*delder
+            #delY=delX
             del_W.append(delW)
             del_B.append(delB)
         del_W.reverse()
@@ -299,6 +307,7 @@ def train(
             net.weights = weights_updated
             net.biases = biases_updated
 
+
             for entry in net.weights:
                 if np.isnan(entry).any():
                     print('Epoch w',e)
@@ -306,10 +315,15 @@ def train(
             for entr in net.biases:
                 if np.isnan(entr).any():
                     print('Epoch w',e)
-        dev_pred = net(dev_input)
+
+    
+        train_loss = cross_entropy_loss(batch_target,pred)
+        print(train_loss)
         #print(dev_pred)
-        dev_ce = cross_entropy_loss(dev_target, dev_pred)
-        print(dev_ce)
+    dev_pred = net(dev_input)    
+    dev_ce = cross_entropy_loss(dev_target, dev_pred)
+    print("****************")
+    print(dev_ce)
 
 			# Compute loss for the batch
 			#batch_loss = loss_fn(batch_target, pred, net.weights, net.biases, lamda)
@@ -399,11 +413,11 @@ def read_data():
 def main():
 
     # Hyper-parameters 
-    max_epochs = 100
-    batch_size = 8
+    max_epochs = 50
+    batch_size = 256
     learning_rate = 0.001
-    num_layers = 2
-    num_units = 32
+    num_layers = 3
+    num_units = 64
     lamda = 0.1 # Regularization Parameter
 
     train_input, train_target, dev_input, dev_target, test_input = read_data()
@@ -415,8 +429,59 @@ def main():
         dev_input, dev_target
     )
     answer=[]
-    z=(get_test_data_predictions(net, dev_input))
-    print(np.argmax(z, axis=1))     
+    z=(get_test_data_predictions(net,train_input))
+    t=(np.argmax(z, axis=1))  
+    y=np.zeros((len(t),4))
+    print(len(t))
+    for i in range(len(t)):
+        y[i,t[i]]=1
+    count=0
+    for i in range(len(y)):
+        tu=0
+        for j in range(0, 4):
+            if (y[i][j] == train_target[i][j]):
+                tu=tu+1
+        if(tu==4):
+            count=count+1
+    print(count)  
+    z=(get_test_data_predictions(net,dev_input))
+    t=(np.argmax(z, axis=1))  
+    y=np.zeros((len(t),4))
+    print(len(t))
+    for i in range(len(t)):
+        y[i,t[i]]=1
+    count=0
+    for i in range(len(y)):
+        tu=0
+        for j in range(0, 4):
+            if (y[i][j] == dev_target[i][j]):
+                tu=tu+1
+        if(tu==4):
+            count=count+1
+    print(count)  
+    zp=(get_test_data_predictions(net,test_input))
+    tp=(np.argmax(zp, axis=1))  
+        
+    df = pd.DataFrame(tp,columns=['Predictions'])
+    df.index +=1
+    df.index.name = 'Id'
+    df = df.replace(to_replace=0,value="Very Old")
+    df=df.replace(to_replace=1,value="Old")
+    df=df.replace(to_replace=2,value="Recent")
+    df=df.replace(to_replace=3,value="New")
+    print(df)
+
+    
+    df.to_csv('test_pred.csv',index=True,columns=['Predictions'])   
+   
+                         
+
+           
+
+
+
+
+       
 
 
 

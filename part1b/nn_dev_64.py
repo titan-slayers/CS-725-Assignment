@@ -375,6 +375,9 @@ def train(
 	epoch_losses = np.array(epoch_losses)
 	p, q = epoch_losses.T
 	plt.plot(p,q)
+	plt.xlabel("Number of epochs")
+	plt.ylabel("RMSE Loss")
+	plt.legend()
 	plt.savefig('../dev_64.png')
 
 	dev_pred = net(dev_input)

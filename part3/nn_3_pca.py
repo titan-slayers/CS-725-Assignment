@@ -392,6 +392,7 @@ def train(
 	dev_pred = net(dev_input)
 	dev_rmse = rmse(dev_target, dev_pred)
 	print('RMSE on dev data: {:.5f}'.format(dev_rmse))
+	f.write()
 
 	pred = net(train_input)
 	train_rmse = rmse(train_target,pred)

@@ -496,7 +496,7 @@ def main():
 	test_pred = net(test_input)
 	test_rmse = rmse(test_target, test_pred)
 
-	f = open("logs.txt","a")
+	f = open("logs11.txt","a")
 	L = ['epoch '+ str(max_epochs),'\nbatch size '+ str(batch_size),'\nlearning rate '+ str(learning_rate),'\nNum Layers '+ str(num_layers),'\nNum Units '+ str(num_units),'\nRMSE on Train data ' + str(train_rmse), '\nRMSE on Dev data ' + str(dev_rmse),'\nRMSE on Test data ' + str(test_rmse)+ '\n\n\n\n']
 	f.writelines(L)
 	f.close()

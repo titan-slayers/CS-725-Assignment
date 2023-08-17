@@ -61,7 +61,9 @@ class Net(object):
 
 
 	def activation(self,h):
-		return np.maximum(0,h)
+		np.maximum(0,h)
+		return h
+		
 
 			
 	
@@ -107,6 +109,15 @@ class Net(object):
 			else: # No activation for the output layer
 				a=h
 		return [activations,a]
+	def derivative_relu(self,h):
+		
+		t=np.copy(h)
+		
+		t[t>=0]=1
+		t[t<0]=0
+		
+		return t
+	
 
 
 	def backward(self, X, y, lamda):
@@ -134,15 +145,21 @@ class Net(object):
 		del_W=[]
 		del_B=[]
 		
+		
 		for (w,a) in reversed(list(zip(self.weights,answer))):
 			delW=np.dot(a.T,delY)+ (lamda*w)
 			delB=np.sum(delY,axis=0)
 			delB = np.reshape(delB,(len(delB),1))
 			delX=np.dot(delY,w.T)
+			delder = self.derivative_relu(a)
+			delY=np.multiply(delder,delX)
 			delY=delX
+				
+
 		
 			del_W.append(delW)
 			del_B.append(delB)
+			
 
 		
 		del_W.reverse()
@@ -423,11 +440,11 @@ def read_data():
 def main():
 
 	# Hyper-parameters 
-	max_epochs = 100
-	batch_size = 64
+	max_epochs = 200
+	batch_size = 32
 	learning_rate = 0.001
-	num_layers = 2
-	num_units = 64
+	num_layers = 3
+	num_units = 16
 	lamda = 0.01 # Regularization Parameter
 
 	train_input, train_target, dev_input, dev_target, test_input = read_data()
